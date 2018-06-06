@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 
 import java.sql.*;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -40,14 +41,12 @@ public class JavaFXApplication3 extends Application {
                         || formularzDodawania.stanowisko.getText().isEmpty()) {
 
                 } else {
-                    boolean ret =
-                    baza.dodaj(new Pracownik(Long.parseLong(formularzDodawania.pesel.getText()),
+                    boolean ret = baza.dodaj(new Pracownik(Long.parseLong(formularzDodawania.pesel.getText()),
                             formularzDodawania.imie.getText(),
                             formularzDodawania.nazwisko.getText(),
                             Integer.parseInt(formularzDodawania.nrKonta.getText()),
                             formularzDodawania.stanowisko.getText()));
-                    if(ret)
-                    {
+                    if (ret) {
                         m_primaryStage.setScene(m_menu);
                     }
                 }
@@ -57,7 +56,15 @@ public class JavaFXApplication3 extends Application {
         formularzSzukania = new Formularz("Szukaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-//                insert();
+                String wynik = baza.szukaj(formularzDodawania.pesel.getText(),
+                        formularzDodawania.imie.getText(),
+                        formularzDodawania.nazwisko.getText(),
+                        formularzDodawania.nrKonta.getText(),
+                        formularzDodawania.stanowisko.getText());
+
+                wynikArea.setText(wynik);
+                m_primaryStage.setScene(m_scenaListy);
+
             }
         });
         formularzEdycji = new Formularz("Zapisz zmiany", new EventHandler<ActionEvent>() {
@@ -69,6 +76,21 @@ public class JavaFXApplication3 extends Application {
         m_scenaDodawania = formularzDodawania.utworzScene();
         m_scenaSzukania = formularzSzukania.utworzScene();
         m_scenaEdycji = formularzEdycji.utworzScene();
+
+        Button wroc = new Button();
+        wroc.setText("Wróć do menu");
+        wroc.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                m_primaryStage.setScene(m_menu);
+            }
+        });
+        wynikArea.setEditable(false);
+        VBox vbox = new VBox();
+        vbox.setPadding(new Insets(15, 12, 15, 12));
+        vbox.setSpacing(8);
+        vbox.getChildren().addAll(wynikArea, wroc);
+        m_scenaListy = new Scene(vbox, 300, 600);
 
         m_primaryStage.setTitle("Pracownicy");
         m_primaryStage.setScene(m_menu);
@@ -90,7 +112,9 @@ public class JavaFXApplication3 extends Application {
     private Scene m_scenaDodawania;
     private Scene m_scenaSzukania;
     private Scene m_scenaEdycji;
+    private Scene m_scenaListy;
     private BazaDanych baza = new BazaDanych();
+    private TextArea wynikArea = new TextArea();
 
     private Scene utworzSceneMenu() {
         VBox vbox = new VBox();
@@ -134,81 +158,6 @@ public class JavaFXApplication3 extends Application {
         vbox.getChildren().addAll(dodajBtn, szukajBtn, edytujBtn, usunBtn);
         return new Scene(vbox, 300, 250);
     }
-
-    //dostęp do bazy danych   
-    public static void select() {
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            System.out.println("Registering database...");
-            //STEP 2: Register JDBC driver
-            Class.forName("org.sqlite.JDBC");
-
-            //STEP 3: Open a connection
-            System.out.println("Connecting to database...");
-            conn = DriverManager.getConnection("jdbc:sqlite:baza_pracownikow.db");
-
-            //STEP 4: Execute a query
-            System.out.println("Creating database...");
-            stmt = conn.createStatement();
-
-            String sql = "select * from pracownicy";
-            ResultSet rs = stmt.executeQuery(sql);
-
-            VBox vLista = new VBox();
-            vLista.setPadding(new Insets(15, 12, 15, 12));
-            vLista.setSpacing(8);
-
-            while (rs.next()) {
-                long pesel = rs.getLong("pesel");
-                String imie = rs.getString("imie");
-                String nazwisko = rs.getString("nazwisko");
-                String stanowisko = rs.getString("stanowisko");
-                int nrKonta = rs.getInt("nr_konta");
-
-                HBox hPola = new HBox();
-                Label label = new Label("pesel = " + pesel);
-                label.setWrapText(true);
-                hPola.getChildren().add(label);
-
-                Label label2 = new Label("imie = " + imie);
-                label2.setWrapText(true);
-                hPola.getChildren().add(label2);
-
-                vLista.getChildren().add(hPola);
-                System.out.println("pesel = " + pesel);
-                System.out.println("imie = " + imie);
-                System.out.println("nazwisko = " + nazwisko);
-                System.out.println("stanowisko = " + stanowisko);
-                System.out.println("nr konta = " + nrKonta);
-                System.out.println();
-            }
-
-            System.out.println("Database created successfully...");
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (SQLException se2) {
-            }// nothing we can do
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-        System.out.println("Goodbye!");
-    }//end main
 
     private class Formularz {
 
@@ -293,11 +242,11 @@ public class JavaFXApplication3 extends Application {
             return bRet;
         }
 
-        public boolean szukaj(String pesel, String imie, String nazwisko, String nrKonta, String stanowisko) {
+        public String szukaj(String pesel, String imie, String nazwisko, String nrKonta, String stanowisko) {
             Connection c = null;
             Statement stmt = null;
+            String wynik = new String();
 
-            boolean bRet = true;
             try {
                 Class.forName(sterownik);
                 c = DriverManager.getConnection(nazwaBazy);
@@ -305,16 +254,17 @@ public class JavaFXApplication3 extends Application {
 
                 stmt = c.createStatement();
                 String sql = "select pesel,imie,nazwisko,nr_konta,stanowisko"
-                        + " from pracownicy () "
-                        + "where ";
+                        + " from pracownicy ";
                 boolean dodajAnd = false;
                 if (!pesel.isEmpty()) {
-                    sql += " pesel = " + Long.parseLong(pesel);
+                    sql += "where pesel = " + Long.parseLong(pesel);
                     dodajAnd = true;
                 }
                 if (!imie.isEmpty()) {
                     if (dodajAnd) {
                         sql += " and ";
+                    } else {
+                        sql += " where ";
                     }
                     sql += " imie = `" + imie + "`";
                     dodajAnd = true;
@@ -322,6 +272,8 @@ public class JavaFXApplication3 extends Application {
                 if (!nazwisko.isEmpty()) {
                     if (dodajAnd) {
                         sql += " and ";
+                    } else {
+                        sql += " where ";
                     }
                     sql += " nazwisko = `" + nazwisko + "`";
                     dodajAnd = true;
@@ -329,6 +281,8 @@ public class JavaFXApplication3 extends Application {
                 if (!nrKonta.isEmpty()) {
                     if (dodajAnd) {
                         sql += " and ";
+                    } else {
+                        sql += " where ";
                     }
                     sql += " nrKonta = " + Long.parseLong(nrKonta);
                     dodajAnd = true;
@@ -336,6 +290,8 @@ public class JavaFXApplication3 extends Application {
                 if (!stanowisko.isEmpty()) {
                     if (dodajAnd) {
                         sql += " and ";
+                    } else {
+                        sql += " where ";
                     }
                     sql += " stanowisko = `" + stanowisko + "`";
 
@@ -349,38 +305,23 @@ public class JavaFXApplication3 extends Application {
                 vLista.setSpacing(8);
 
                 while (rs.next()) {
-//                    long pesel = rs.getLong("pesel");
-//                    String imie = rs.getString("imie");
-//                    String nazwisko = rs.getString("nazwisko");
-//                    String stanowisko = rs.getString("stanowisko");
-//                    int nrKonta = rs.getInt("nr_konta");
+                    wynik += rs.getLong("pesel") + " ";
+                    wynik += rs.getString("imie") + " ";
+                    wynik += rs.getString("nazwisko") + " ";
+                    wynik += rs.getString("stanowisko") + " ";
+                    wynik += rs.getInt("nr_konta");
+                    wynik += "\n";
 
-                    HBox hPola = new HBox();
-                    Label label = new Label("pesel = " + rs.getLong("pesel"));
-                    label.setWrapText(true);
-                    hPola.getChildren().add(label);
-
-                    Label label2 = new Label("imie = " + rs.getString("imie"));
-                    label2.setWrapText(true);
-                    hPola.getChildren().add(label2);
-
-                    vLista.getChildren().add(hPola);
-//                    System.out.println("pesel = " + pesel);
-//                    System.out.println("imie = " + imie);
-//                    System.out.println("nazwisko = " + nazwisko);
-//                    System.out.println("stanowisko = " + stanowisko);
-//                    System.out.println("nr konta = " + nrKonta);
-//                    System.out.println();
                 }
-             stmt.close();
-             
+                stmt.close();
+
                 c.close();
 
             } catch (Exception e) {
                 System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                bRet = false;
+
             }
-            return bRet;
+            return wynik;
         }
 
         public void edytuj(Pracownik p) {
