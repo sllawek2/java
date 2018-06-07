@@ -94,21 +94,7 @@ public class JavaFXApplication3 extends Application {
         vbox.getChildren().addAll(wynikArea, wroc);
         m_scenaListy = new Scene(vbox, 300, 600);
 
-        TextField peselUsun = new TextField();
-        peselUsun.setPromptText("pesel do usuniecia");
-        Button usunBtn = new Button();
-        usunBtn.setText("Usun");
-        usunBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                baza.usun(peselUsun.getText());
-                m_primaryStage.setScene(m_scenaDodawania);
-            }
-        });
-        VBox vUsun = new VBox();
-        vUsun.setPadding(new Insets(15, 12, 15, 12));
-        vUsun.setSpacing(8);
-        vUsun.getChildren().addAll(peselUsun, usunBtn);
+
         m_scenaUsuwania = new Scene(vUsun, 300, 300);
 
         
@@ -122,9 +108,25 @@ public class JavaFXApplication3 extends Application {
  tab1.setText("Szukaj pracownika");
  tab1.setContent(formularzSzukania.utworzScene());
  
+         TextField peselUsun = new TextField();
+        peselUsun.setPromptText("pesel do usuniecia");
+        Button usunBtn = new Button();
+        usunBtn.setText("Usun");
+        usunBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                baza.usun(peselUsun.getText());
+                m_primaryStage.setScene(m_scenaDodawania);
+            }
+        });
+        VBox vUsun = new VBox();
+        vUsun.setPadding(new Insets(15, 12, 15, 12));
+        vUsun.setSpacing(8);
+        vUsun.getChildren().addAll(peselUsun, usunBtn); 
+ 
   Tab tab2 = new Tab();
  tab2.setText("Usun pracownika");
- tab2.setContent(formularzEdycji.utworzScene());
+ tab2.setContent(vUsun);
  tabPane.getTabs().addAll(tab, tab1, tab2);
         Scene root = new Scene(tabPane, 200,200);
         
