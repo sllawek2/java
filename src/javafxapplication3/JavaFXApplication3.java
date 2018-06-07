@@ -43,11 +43,11 @@ public class JavaFXApplication3 extends Application {
                         || formularzDodawania.stanowisko.getText().isEmpty()) {
 
                 } else {
-                    boolean ret = baza.dodaj(new Pracownik(Long.parseLong(formularzDodawania.pesel.getText()),
+                    boolean ret = baza.dodaj(formularzDodawania.pesel.getText(),
                             formularzDodawania.imie.getText(),
                             formularzDodawania.nazwisko.getText(),
-                            Integer.parseInt(formularzDodawania.nrKonta.getText()),
-                            formularzDodawania.stanowisko.getText()));
+                            formularzDodawania.nrKonta.getText(),
+                            formularzDodawania.stanowisko.getText());
                     if (ret) {
                         formularzDodawania.statusArea.setText("Pomyslnie dodano do bazy");
                     } else {
@@ -60,21 +60,14 @@ public class JavaFXApplication3 extends Application {
         formularzSzukania = new Formularz("Szukaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                String wynik = baza.szukaj(formularzDodawania.pesel.getText(),
-                        formularzDodawania.imie.getText(),
-                        formularzDodawania.nazwisko.getText(),
-                        formularzDodawania.nrKonta.getText(),
-                        formularzDodawania.stanowisko.getText());
+                String wynik = baza.szukaj(formularzSzukania.pesel.getText(),
+                        formularzSzukania.imie.getText(),
+                        formularzSzukania.nazwisko.getText(),
+                        formularzSzukania.nrKonta.getText(),
+                        formularzSzukania.stanowisko.getText());
 
-                wynikArea.setText(wynik);
-//                m_primaryStage.setScene(m_scenaListy);
+                formularzSzukania.statusArea.setText(wynik);
 
-            }
-        });
-        formularzEdycji = new Formularz("Zapisz zmiany", new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-//                insert();
             }
         });
 
@@ -118,7 +111,7 @@ public class JavaFXApplication3 extends Application {
         tab2.setText("Usun pracownika");
         tab2.setContent(vUsun);
         tabPane.getTabs().addAll(tab, tab1, tab2);
-        Scene root = new Scene(tabPane, 200, 200);
+        Scene root = new Scene(tabPane, 400, 600);
 
         primaryStage.setTitle("Pracownicy");
         primaryStage.setScene(root);
@@ -134,59 +127,8 @@ public class JavaFXApplication3 extends Application {
     }
     private Formularz formularzDodawania;
     private Formularz formularzSzukania;
-    private Formularz formularzEdycji;
-    private Stage m_primaryStage;
-    private Scene m_menu;
-    private Scene m_scenaDodawania;
-    private Scene m_scenaSzukania;
-    private Scene m_scenaEdycji;
-    private Scene m_scenaListy;
-    private Scene m_scenaUsuwania;
     private BazaDanych baza = new BazaDanych();
-    private TextArea wynikArea = new TextArea();
 
-    //private Scene utworzSceneMenu() {
-    //    VBox vbox = new VBox();
-    //    vbox.setPadding(new Insets(15, 12, 15, 12));
-    //    vbox.setSpacing(8);
-    //
-    //    Button dodajBtn = new Button();
-    //    dodajBtn.setText("Dodaj pracownika");
-    //    dodajBtn.setOnAction(new EventHandler<ActionEvent>() {
-    //        @Override
-    //        public void handle(ActionEvent event) {
-    //            m_primaryStage.setScene(m_scenaDodawania);
-    //        }
-    //    });
-    //
-    //    Button szukajBtn = new Button();
-    //    szukajBtn.setText("Szukaj pracownika");
-    //    szukajBtn.setOnAction(new EventHandler<ActionEvent>() {
-    //        @Override
-    //        public void handle(ActionEvent event) {
-    //            m_primaryStage.setScene(m_scenaSzukania);
-    //        }
-    //    });
-    //    Button edytujBtn = new Button();
-    //    edytujBtn.setText("Edytuj dane pracownika");
-    //    edytujBtn.setOnAction(new EventHandler<ActionEvent>() {
-    //        @Override
-    //        public void handle(ActionEvent event) {
-    //            m_primaryStage.setScene(m_scenaEdycji);
-    //        }
-    //    });
-    //    Button usunBtn = new Button();
-    //    usunBtn.setText("Usuń pracownika");
-    //    usunBtn.setOnAction(new EventHandler<ActionEvent>() {
-    //        @Override
-    //        public void handle(ActionEvent event) {
-    //            m_primaryStage.setScene(m_scenaUsuwania);
-    //        }
-    //    });
-    //
-    //    vbox.getChildren().addAll(dodajBtn, szukajBtn, edytujBtn, usunBtn);
-    //    return new Scene(vbox, 300, 250);
-    //}
     private class Formularz {
 
         public Formularz(String akcja, EventHandler<ActionEvent> e) {
@@ -198,13 +140,6 @@ public class JavaFXApplication3 extends Application {
 
             this.akcja.setText(akcja);
             this.akcja.setOnAction(e);
-            wroc.setText("Wróć do menu");
-            wroc.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    m_primaryStage.setScene(m_menu);
-                }
-            });
 
             statusArea.setEditable(false);
         }
@@ -213,11 +148,10 @@ public class JavaFXApplication3 extends Application {
             VBox formularz = new VBox();
             formularz.setPadding(new Insets(15, 12, 15, 12));
             formularz.setSpacing(8);
-            formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, wroc);
-//            return new Scene(formularz, 300, 250);
+            formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, statusArea);
+
             return formularz;
         }
-        public Button wroc = new Button();
         public Button akcja = new Button();
         public TextField pesel = new TextField();
         public TextField imie = new TextField();
@@ -227,29 +161,28 @@ public class JavaFXApplication3 extends Application {
         public TextArea statusArea = new TextArea();
     }
 
-    private class Pracownik {
-
-        Pracownik(long pesel, String imie, String nazwisko, long nrKonta, String stanowisko) {
-            this.pesel = pesel;
-            this.imie = imie;
-            this.nazwisko = nazwisko;
-            this.nrKonta = nrKonta;
-            this.stanowisko = stanowisko;
-        }
-
-        long pesel;
-        String imie = new String();
-        String nazwisko = new String();
-        long nrKonta;
-        String stanowisko = new String();
-    }
-
+//    private class Pracownik {
+//
+//        Pracownik(long pesel, String imie, String nazwisko, long nrKonta, String stanowisko) {
+//            this.pesel = pesel;
+//            this.imie = imie;
+//            this.nazwisko = nazwisko;
+//            this.nrKonta = nrKonta;
+//            this.stanowisko = stanowisko;
+//        }
+//
+//        long pesel;
+//        String imie = new String();
+//        String nazwisko = new String();
+//        long nrKonta;
+//        String stanowisko = new String();
+//    }
     private class BazaDanych {
 
         private String sterownik = new String("org.sqlite.JDBC");
         private String nazwaBazy = new String("jdbc:sqlite:baza_pracownikow.db");
 
-        public boolean dodaj(Pracownik p) {
+        public boolean dodaj(String pesel, String imie, String nazwisko, String nrKonta, String stanowisko) {
             Connection c = null;
             Statement stmt = null;
 
@@ -261,7 +194,7 @@ public class JavaFXApplication3 extends Application {
 
                 stmt = c.createStatement();
                 String sql = "INSERT INTO pracownicy (pesel,imie,nazwisko,nr_konta,stanowisko) "
-                        + "VALUES (" + p.pesel + ", '" + p.imie + "', '" + p.nazwisko + "', " + p.nrKonta + ", '" + p.stanowisko + "' );";
+                        + "VALUES (" + Long.parseLong(pesel) + ", '" + imie + "', '" + nazwisko + "', " + Long.parseLong(nrKonta) + ", '" + stanowisko + "' );";
                 stmt.executeUpdate(sql);
 
                 stmt.close();
