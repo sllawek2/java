@@ -31,8 +31,8 @@ public class JavaFXApplication3 extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        m_primaryStage = primaryStage;
-        m_menu = utworzSceneMenu();
+//        m_primaryStage = primaryStage;
+        //       m_menu = utworzSceneMenu();
         formularzDodawania = new Formularz("Dodaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -50,10 +50,9 @@ public class JavaFXApplication3 extends Application {
                             formularzDodawania.stanowisko.getText()));
                     if (ret) {
                         formularzDodawania.statusArea.setText("Pomyslnie dodano do bazy");
+                    } else {
+                        formularzDodawania.statusArea.setText("Error");
                     }
-					else{
-						formularzDodawania.statusArea.setText("Error");
-					}
                 }
 
             }
@@ -68,7 +67,7 @@ public class JavaFXApplication3 extends Application {
                         formularzDodawania.stanowisko.getText());
 
                 wynikArea.setText(wynik);
-                m_primaryStage.setScene(m_scenaListy);
+//                m_primaryStage.setScene(m_scenaListy);
 
             }
         });
@@ -78,46 +77,23 @@ public class JavaFXApplication3 extends Application {
 //                insert();
             }
         });
-//        m_scenaDodawania = formularzDodawania.utworzScene();
-//        m_scenaSzukania = formularzSzukania.utworzScene();
-//        m_scenaEdycji = formularzEdycji.utworzScene();
 
-//       Button wroc = new Button();
-//       wroc.setText("Wróć do menu");
-//       wroc.setOnAction(new EventHandler<ActionEvent>() {
-//           @Override
-//           public void handle(ActionEvent event) {
-//               m_primaryStage.setScene(m_menu);
-//           }
-//       });
-//       wynikArea.setEditable(false);
-//       VBox vbox = new VBox();
-//       vbox.setPadding(new Insets(15, 12, 15, 12));
-//       vbox.setSpacing(8);
-//       vbox.getChildren().addAll(wynikArea, wroc);
-//       m_scenaListy = new Scene(vbox, 300, 600);
-//
-//
-//       m_scenaUsuwania = new Scene(vUsun, 300, 300);
-//
-        
         //zakładka dodawania
- TabPane tabPane = new TabPane();
- Tab tab = new Tab();
- tab.setText("Dodaj pracownika");
- tab.setContent(formularzDodawania.utworzVBox());
- 
- //zakładka szukania
-  Tab tab1 = new Tab();
- tab1.setText("Szukaj pracownika");
- tab1.setContent(formularzSzukania.utworzVBox());
- 
- 
- //zakładka usuwania
-         TextArea statusUsun = new TextArea();
-		 statusUsun.setEditable(false);
- 
-         TextField peselUsun = new TextField();
+        TabPane tabPane = new TabPane();
+        Tab tab = new Tab();
+        tab.setText("Dodaj pracownika");
+        tab.setContent(formularzDodawania.utworzVBox());
+
+        //zakładka szukania
+        Tab tab1 = new Tab();
+        tab1.setText("Szukaj pracownika");
+        tab1.setContent(formularzSzukania.utworzVBox());
+
+        //zakładka usuwania
+        TextArea statusUsun = new TextArea();
+        statusUsun.setEditable(false);
+
+        TextField peselUsun = new TextField();
         peselUsun.setPromptText("pesel do usuniecia");
         Button usunBtn = new Button();
         usunBtn.setText("Usun");
@@ -125,34 +101,28 @@ public class JavaFXApplication3 extends Application {
             @Override
             public void handle(ActionEvent event) {
                 boolean ret = baza.usun(peselUsun.getText());
-                if(ret)
-				{
-					statusUsun.setText("usunieto pomyslnie");
-				}
-				else{
-					statusUsun.setText("blad podczas usuwania");
-				}
+                if (ret) {
+                    statusUsun.setText("usunieto pomyslnie");
+                } else {
+                    statusUsun.setText("blad podczas usuwania");
+                }
             }
         });
         VBox vUsun = new VBox();
         vUsun.setPadding(new Insets(15, 12, 15, 12));
         vUsun.setSpacing(8);
-		
-		
-        vUsun.getChildren().addAll(peselUsun, usunBtn, statusUsun); 
- 
- 
- 
-  Tab tab2 = new Tab();
- tab2.setText("Usun pracownika");
- tab2.setContent(vUsun);
- tabPane.getTabs().addAll(tab, tab1, tab2);
-        Scene root = new Scene(tabPane, 200,200);
-        
-        
-        m_primaryStage.setTitle("Pracownicy");
-        m_primaryStage.setScene(root);
-        m_primaryStage.show();
+
+        vUsun.getChildren().addAll(peselUsun, usunBtn, statusUsun);
+
+        Tab tab2 = new Tab();
+        tab2.setText("Usun pracownika");
+        tab2.setContent(vUsun);
+        tabPane.getTabs().addAll(tab, tab1, tab2);
+        Scene root = new Scene(tabPane, 200, 200);
+
+        primaryStage.setTitle("Pracownicy");
+        primaryStage.setScene(root);
+        primaryStage.show();
     }
 
     /**
@@ -217,7 +187,6 @@ public class JavaFXApplication3 extends Application {
     //    vbox.getChildren().addAll(dodajBtn, szukajBtn, edytujBtn, usunBtn);
     //    return new Scene(vbox, 300, 250);
     //}
-
     private class Formularz {
 
         public Formularz(String akcja, EventHandler<ActionEvent> e) {
@@ -236,8 +205,8 @@ public class JavaFXApplication3 extends Application {
                     m_primaryStage.setScene(m_menu);
                 }
             });
-			
-			statusArea.setEditable(false);
+
+            statusArea.setEditable(false);
         }
 
         public VBox utworzVBox() {
@@ -246,7 +215,7 @@ public class JavaFXApplication3 extends Application {
             formularz.setSpacing(8);
             formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, wroc);
 //            return new Scene(formularz, 300, 250);
-return formularz;
+            return formularz;
         }
         public Button wroc = new Button();
         public Button akcja = new Button();
@@ -255,12 +224,12 @@ return formularz;
         public TextField nazwisko = new TextField();
         public TextField nrKonta = new TextField();
         public TextField stanowisko = new TextField();
-		public TextArea statusArea = new TextArea();
+        public TextArea statusArea = new TextArea();
     }
 
     private class Pracownik {
 
-        Pracownik(long pesel, String imie, String nazwisko, int nrKonta, String stanowisko) {
+        Pracownik(long pesel, String imie, String nazwisko, long nrKonta, String stanowisko) {
             this.pesel = pesel;
             this.imie = imie;
             this.nazwisko = nazwisko;
@@ -271,7 +240,7 @@ return formularz;
         long pesel;
         String imie = new String();
         String nazwisko = new String();
-        int nrKonta;
+        long nrKonta;
         String stanowisko = new String();
     }
 
@@ -398,7 +367,7 @@ return formularz;
                 c.setAutoCommit(false);
 
                 stmt = c.createStatement();
-                String sql = "DELETE FROM pracownicy WHERE pesel = "+pesel;
+                String sql = "DELETE FROM pracownicy WHERE pesel = " + pesel;
                 stmt.executeUpdate(sql);
 
                 stmt.close();
@@ -416,11 +385,3 @@ return formularz;
         }
     }
 }
-
-//
-// 1. narysować przyciski
-// 2. napisać jedną metodę do łączenia się z bazą i ona będzie wywoływana na kliknięcie
-// 3. wyświetlanie listy
-// 4. do usunięcia trzeba podać numer pesel
-// 5. każda akcja powinna wypisąc jakiś komunikat że sie udało albo nie - status bar
-//
