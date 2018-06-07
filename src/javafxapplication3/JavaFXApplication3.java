@@ -49,8 +49,11 @@ public class JavaFXApplication3 extends Application {
                             Integer.parseInt(formularzDodawania.nrKonta.getText()),
                             formularzDodawania.stanowisko.getText()));
                     if (ret) {
-                        m_primaryStage.setScene(m_menu);
+                        formularzDodawania.statusArea.setText("Pomyslnie dodano do bazy");
                     }
+					else{
+						formularzDodawania.statusArea.setText("Error");
+					}
                 }
 
             }
@@ -79,34 +82,40 @@ public class JavaFXApplication3 extends Application {
 //        m_scenaSzukania = formularzSzukania.utworzScene();
 //        m_scenaEdycji = formularzEdycji.utworzScene();
 
-        Button wroc = new Button();
-        wroc.setText("Wróć do menu");
-        wroc.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                m_primaryStage.setScene(m_menu);
-            }
-        });
-        wynikArea.setEditable(false);
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(15, 12, 15, 12));
-        vbox.setSpacing(8);
-        vbox.getChildren().addAll(wynikArea, wroc);
-        m_scenaListy = new Scene(vbox, 300, 600);
-
-
-        m_scenaUsuwania = new Scene(vUsun, 300, 300);
-
+//       Button wroc = new Button();
+//       wroc.setText("Wróć do menu");
+//       wroc.setOnAction(new EventHandler<ActionEvent>() {
+//           @Override
+//           public void handle(ActionEvent event) {
+//               m_primaryStage.setScene(m_menu);
+//           }
+//       });
+//       wynikArea.setEditable(false);
+//       VBox vbox = new VBox();
+//       vbox.setPadding(new Insets(15, 12, 15, 12));
+//       vbox.setSpacing(8);
+//       vbox.getChildren().addAll(wynikArea, wroc);
+//       m_scenaListy = new Scene(vbox, 300, 600);
+//
+//
+//       m_scenaUsuwania = new Scene(vUsun, 300, 300);
+//
         
-        
+        //zakładka dodawania
  TabPane tabPane = new TabPane();
  Tab tab = new Tab();
  tab.setText("Dodaj pracownika");
- tab.setContent(formularzDodawania.utworzScene());
+ tab.setContent(formularzDodawania.utworzVBox());
  
+ //zakładka szukania
   Tab tab1 = new Tab();
  tab1.setText("Szukaj pracownika");
- tab1.setContent(formularzSzukania.utworzScene());
+ tab1.setContent(formularzSzukania.utworzVBox());
+ 
+ 
+ //zakładka usuwania
+         TextArea statusUsun = new TextArea();
+		 statusUsun.setEditable(false);
  
          TextField peselUsun = new TextField();
         peselUsun.setPromptText("pesel do usuniecia");
@@ -115,14 +124,24 @@ public class JavaFXApplication3 extends Application {
         usunBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                baza.usun(peselUsun.getText());
-                m_primaryStage.setScene(m_scenaDodawania);
+                boolean ret = baza.usun(peselUsun.getText());
+                if(ret)
+				{
+					statusUsun.setText("usunieto pomyslnie");
+				}
+				else{
+					statusUsun.setText("blad podczas usuwania");
+				}
             }
         });
         VBox vUsun = new VBox();
         vUsun.setPadding(new Insets(15, 12, 15, 12));
         vUsun.setSpacing(8);
-        vUsun.getChildren().addAll(peselUsun, usunBtn); 
+		
+		
+        vUsun.getChildren().addAll(peselUsun, usunBtn, statusUsun); 
+ 
+ 
  
   Tab tab2 = new Tab();
  tab2.setText("Usun pracownika");
@@ -156,48 +175,48 @@ public class JavaFXApplication3 extends Application {
     private BazaDanych baza = new BazaDanych();
     private TextArea wynikArea = new TextArea();
 
-    private Scene utworzSceneMenu() {
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(15, 12, 15, 12));
-        vbox.setSpacing(8);
-
-        Button dodajBtn = new Button();
-        dodajBtn.setText("Dodaj pracownika");
-        dodajBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                m_primaryStage.setScene(m_scenaDodawania);
-            }
-        });
-
-        Button szukajBtn = new Button();
-        szukajBtn.setText("Szukaj pracownika");
-        szukajBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                m_primaryStage.setScene(m_scenaSzukania);
-            }
-        });
-        Button edytujBtn = new Button();
-        edytujBtn.setText("Edytuj dane pracownika");
-        edytujBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                m_primaryStage.setScene(m_scenaEdycji);
-            }
-        });
-        Button usunBtn = new Button();
-        usunBtn.setText("Usuń pracownika");
-        usunBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                m_primaryStage.setScene(m_scenaUsuwania);
-            }
-        });
-
-        vbox.getChildren().addAll(dodajBtn, szukajBtn, edytujBtn, usunBtn);
-        return new Scene(vbox, 300, 250);
-    }
+    //private Scene utworzSceneMenu() {
+    //    VBox vbox = new VBox();
+    //    vbox.setPadding(new Insets(15, 12, 15, 12));
+    //    vbox.setSpacing(8);
+    //
+    //    Button dodajBtn = new Button();
+    //    dodajBtn.setText("Dodaj pracownika");
+    //    dodajBtn.setOnAction(new EventHandler<ActionEvent>() {
+    //        @Override
+    //        public void handle(ActionEvent event) {
+    //            m_primaryStage.setScene(m_scenaDodawania);
+    //        }
+    //    });
+    //
+    //    Button szukajBtn = new Button();
+    //    szukajBtn.setText("Szukaj pracownika");
+    //    szukajBtn.setOnAction(new EventHandler<ActionEvent>() {
+    //        @Override
+    //        public void handle(ActionEvent event) {
+    //            m_primaryStage.setScene(m_scenaSzukania);
+    //        }
+    //    });
+    //    Button edytujBtn = new Button();
+    //    edytujBtn.setText("Edytuj dane pracownika");
+    //    edytujBtn.setOnAction(new EventHandler<ActionEvent>() {
+    //        @Override
+    //        public void handle(ActionEvent event) {
+    //            m_primaryStage.setScene(m_scenaEdycji);
+    //        }
+    //    });
+    //    Button usunBtn = new Button();
+    //    usunBtn.setText("Usuń pracownika");
+    //    usunBtn.setOnAction(new EventHandler<ActionEvent>() {
+    //        @Override
+    //        public void handle(ActionEvent event) {
+    //            m_primaryStage.setScene(m_scenaUsuwania);
+    //        }
+    //    });
+    //
+    //    vbox.getChildren().addAll(dodajBtn, szukajBtn, edytujBtn, usunBtn);
+    //    return new Scene(vbox, 300, 250);
+    //}
 
     private class Formularz {
 
@@ -217,9 +236,11 @@ public class JavaFXApplication3 extends Application {
                     m_primaryStage.setScene(m_menu);
                 }
             });
+			
+			statusArea.setEditable(false);
         }
 
-        public VBox utworzScene() {
+        public VBox utworzVBox() {
             VBox formularz = new VBox();
             formularz.setPadding(new Insets(15, 12, 15, 12));
             formularz.setSpacing(8);
@@ -234,6 +255,7 @@ return formularz;
         public TextField nazwisko = new TextField();
         public TextField nrKonta = new TextField();
         public TextField stanowisko = new TextField();
+		public TextArea statusArea = new TextArea();
     }
 
     private class Pracownik {
