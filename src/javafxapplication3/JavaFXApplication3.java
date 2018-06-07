@@ -14,13 +14,15 @@ import javafx.stage.Stage;
 import javafx.geometry.Insets;
 
 import java.sql.*;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -41,7 +43,7 @@ public class JavaFXApplication3 extends Application {
                         || formularzDodawania.nazwisko.getText().isEmpty()
                         || formularzDodawania.nrKonta.getText().isEmpty()
                         || formularzDodawania.stanowisko.getText().isEmpty()) {
-
+                    formularzDodawania.status.setText("wypełnij wszystkie pola");
                 } else {
                     boolean ret = baza.dodaj(formularzDodawania.pesel.getText(),
                             formularzDodawania.imie.getText(),
@@ -49,9 +51,9 @@ public class JavaFXApplication3 extends Application {
                             formularzDodawania.nrKonta.getText(),
                             formularzDodawania.stanowisko.getText());
                     if (ret) {
-                        formularzDodawania.statusArea.setText("Pomyslnie dodano do bazy");
+                        formularzDodawania.status.setText("Pomyslnie dodano do bazy");
                     } else {
-                        formularzDodawania.statusArea.setText("Error");
+                        formularzDodawania.status.setText("Error");
                     }
                 }
 
@@ -60,13 +62,12 @@ public class JavaFXApplication3 extends Application {
         formularzSzukania = new Formularz("Szukaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                String wynik = baza.szukaj(formularzSzukania.pesel.getText(),
+                GridPane wynik = baza.szukaj(formularzSzukania.pesel.getText(),
                         formularzSzukania.imie.getText(),
                         formularzSzukania.nazwisko.getText(),
                         formularzSzukania.nrKonta.getText(),
                         formularzSzukania.stanowisko.getText());
-
-                formularzSzukania.statusArea.setText(wynik);
+                borderSzukania.setCenter(wynik);
 
             }
         });
@@ -78,9 +79,11 @@ public class JavaFXApplication3 extends Application {
         tab.setContent(formularzDodawania.utworzVBox());
 
         //zakładka szukania
+        borderSzukania.setTop(formularzSzukania.utworzVBox());
+
         Tab tab1 = new Tab();
         tab1.setText("Szukaj pracownika");
-        tab1.setContent(formularzSzukania.utworzVBox());
+        tab1.setContent(borderSzukania);
 
         //zakładka usuwania
         TextArea statusUsun = new TextArea();
@@ -111,7 +114,7 @@ public class JavaFXApplication3 extends Application {
         tab2.setText("Usun pracownika");
         tab2.setContent(vUsun);
         tabPane.getTabs().addAll(tab, tab1, tab2);
-        Scene root = new Scene(tabPane, 400, 600);
+        Scene root = new Scene(tabPane, 800, 600);
 
         primaryStage.setTitle("Pracownicy");
         primaryStage.setScene(root);
@@ -128,6 +131,7 @@ public class JavaFXApplication3 extends Application {
     private Formularz formularzDodawania;
     private Formularz formularzSzukania;
     private BazaDanych baza = new BazaDanych();
+    BorderPane borderSzukania = new BorderPane();
 
     private class Formularz {
 
@@ -141,14 +145,14 @@ public class JavaFXApplication3 extends Application {
             this.akcja.setText(akcja);
             this.akcja.setOnAction(e);
 
-            statusArea.setEditable(false);
+            status.setEditable(false);
         }
 
         public VBox utworzVBox() {
             VBox formularz = new VBox();
             formularz.setPadding(new Insets(15, 12, 15, 12));
             formularz.setSpacing(8);
-            formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, statusArea);
+            formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, status);
 
             return formularz;
         }
@@ -158,25 +162,9 @@ public class JavaFXApplication3 extends Application {
         public TextField nazwisko = new TextField();
         public TextField nrKonta = new TextField();
         public TextField stanowisko = new TextField();
-        public TextArea statusArea = new TextArea();
+        public TextField status = new TextField();
     }
 
-//    private class Pracownik {
-//
-//        Pracownik(long pesel, String imie, String nazwisko, long nrKonta, String stanowisko) {
-//            this.pesel = pesel;
-//            this.imie = imie;
-//            this.nazwisko = nazwisko;
-//            this.nrKonta = nrKonta;
-//            this.stanowisko = stanowisko;
-//        }
-//
-//        long pesel;
-//        String imie = new String();
-//        String nazwisko = new String();
-//        long nrKonta;
-//        String stanowisko = new String();
-//    }
     private class BazaDanych {
 
         private String sterownik = new String("org.sqlite.JDBC");
@@ -207,10 +195,16 @@ public class JavaFXApplication3 extends Application {
             return bRet;
         }
 
-        public String szukaj(String pesel, String imie, String nazwisko, String nrKonta, String stanowisko) {
+        public GridPane szukaj(String pesel, String imie, String nazwisko, String nrKonta, String stanowisko) {
             Connection c = null;
             Statement stmt = null;
-            String wynik = new String();
+            GridPane vLista = new GridPane();
+            vLista.setHgap(10);
+            vLista.setVgap(10);
+
+            vLista.setPadding(new Insets(10, 10, 10, 10));
+
+            int nrWiersza = 1;
 
             try {
                 Class.forName(sterownik);
@@ -231,7 +225,7 @@ public class JavaFXApplication3 extends Application {
                     } else {
                         sql += " where ";
                     }
-                    sql += " imie = `" + imie + "`";
+                    sql += " imie = '" + imie + "'";
                     dodajAnd = true;
                 }
                 if (!nazwisko.isEmpty()) {
@@ -240,7 +234,7 @@ public class JavaFXApplication3 extends Application {
                     } else {
                         sql += " where ";
                     }
-                    sql += " nazwisko = `" + nazwisko + "`";
+                    sql += " nazwisko = '" + nazwisko + "'";
                     dodajAnd = true;
                 }
                 if (!nrKonta.isEmpty()) {
@@ -249,7 +243,7 @@ public class JavaFXApplication3 extends Application {
                     } else {
                         sql += " where ";
                     }
-                    sql += " nrKonta = " + Long.parseLong(nrKonta);
+                    sql += " nr_konta = " + Long.parseLong(nrKonta);
                     dodajAnd = true;
                 }
                 if (!stanowisko.isEmpty()) {
@@ -258,25 +252,27 @@ public class JavaFXApplication3 extends Application {
                     } else {
                         sql += " where ";
                     }
-                    sql += " stanowisko = `" + stanowisko + "`";
+                    sql += " stanowisko = '" + stanowisko + "'";
 
                 }
 
                 stmt.executeQuery(sql);
                 ResultSet rs = stmt.executeQuery(sql);
 
-                VBox vLista = new VBox();
-                vLista.setPadding(new Insets(15, 12, 15, 12));
-                vLista.setSpacing(8);
-
                 while (rs.next()) {
-                    wynik += rs.getLong("pesel") + " ";
-                    wynik += rs.getString("imie") + " ";
-                    wynik += rs.getString("nazwisko") + " ";
-                    wynik += rs.getString("stanowisko") + " ";
-                    wynik += rs.getInt("nr_konta");
-                    wynik += "\n";
+                    Label label1 = new Label(String.valueOf(rs.getLong("pesel")));
+                    Label label2 = new Label(rs.getString("imie"));
+                    Label label3 = new Label(rs.getString("nazwisko"));
+                    Label label4 = new Label(String.valueOf(rs.getLong("nr_konta")));
+                    Label label5 = new Label(rs.getString("stanowisko"));
 
+                    vLista.add(label1, 0, nrWiersza);
+                    vLista.add(label2, 1, nrWiersza);
+                    vLista.add(label3, 2, nrWiersza);
+                    vLista.add(label4, 3, nrWiersza);
+                    vLista.add(label5, 4, nrWiersza);
+
+                    nrWiersza++;
                 }
                 stmt.close();
 
@@ -286,7 +282,24 @@ public class JavaFXApplication3 extends Application {
                 System.err.println(e.getClass().getName() + ": " + e.getMessage());
 
             }
-            return wynik;
+
+            if (nrWiersza == 1)//nie ma żadnego wyniku
+            {
+                Label status = new Label("zapytanie nic nie zwróciło");
+                vLista.add(status, 0, 0, 5, 1);
+            } else {
+                Label l1 = new Label("pesel");
+                Label l2 = new Label("imie");
+                Label l3 = new Label("nazwisko");
+                Label l4 = new Label("nr konta");
+                Label l5 = new Label("stanowisko");
+                vLista.add(l1, 0, 0);
+                vLista.add(l2, 1, 0);
+                vLista.add(l3, 2, 0);
+                vLista.add(l4, 3, 0);
+                vLista.add(l5, 4, 0);
+            }
+            return vLista;
         }
 
         public boolean usun(String pesel) {
