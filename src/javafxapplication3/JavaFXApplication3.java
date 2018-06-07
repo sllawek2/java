@@ -14,11 +14,13 @@ import javafx.stage.Stage;
 import javafx.geometry.Insets;
 
 import java.sql.*;
-import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -73,9 +75,9 @@ public class JavaFXApplication3 extends Application {
 //                insert();
             }
         });
-        m_scenaDodawania = formularzDodawania.utworzScene();
-        m_scenaSzukania = formularzSzukania.utworzScene();
-        m_scenaEdycji = formularzEdycji.utworzScene();
+//        m_scenaDodawania = formularzDodawania.utworzScene();
+//        m_scenaSzukania = formularzSzukania.utworzScene();
+//        m_scenaEdycji = formularzEdycji.utworzScene();
 
         Button wroc = new Button();
         wroc.setText("Wróć do menu");
@@ -92,8 +94,43 @@ public class JavaFXApplication3 extends Application {
         vbox.getChildren().addAll(wynikArea, wroc);
         m_scenaListy = new Scene(vbox, 300, 600);
 
+        TextField peselUsun = new TextField();
+        peselUsun.setPromptText("pesel do usuniecia");
+        Button usunBtn = new Button();
+        usunBtn.setText("Usun");
+        usunBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                baza.usun(peselUsun.getText());
+                m_primaryStage.setScene(m_scenaDodawania);
+            }
+        });
+        VBox vUsun = new VBox();
+        vUsun.setPadding(new Insets(15, 12, 15, 12));
+        vUsun.setSpacing(8);
+        vUsun.getChildren().addAll(peselUsun, usunBtn);
+        m_scenaUsuwania = new Scene(vUsun, 300, 300);
+
+        
+        
+ TabPane tabPane = new TabPane();
+ Tab tab = new Tab();
+ tab.setText("Dodaj pracownika");
+ tab.setContent(formularzDodawania.utworzScene());
+ 
+  Tab tab1 = new Tab();
+ tab1.setText("Szukaj pracownika");
+ tab1.setContent(formularzSzukania.utworzScene());
+ 
+  Tab tab2 = new Tab();
+ tab2.setText("Usun pracownika");
+ tab2.setContent(formularzEdycji.utworzScene());
+ tabPane.getTabs().addAll(tab, tab1, tab2);
+        Scene root = new Scene(tabPane, 200,200);
+        
+        
         m_primaryStage.setTitle("Pracownicy");
-        m_primaryStage.setScene(m_menu);
+        m_primaryStage.setScene(root);
         m_primaryStage.show();
     }
 
@@ -113,6 +150,7 @@ public class JavaFXApplication3 extends Application {
     private Scene m_scenaSzukania;
     private Scene m_scenaEdycji;
     private Scene m_scenaListy;
+    private Scene m_scenaUsuwania;
     private BazaDanych baza = new BazaDanych();
     private TextArea wynikArea = new TextArea();
 
@@ -151,7 +189,7 @@ public class JavaFXApplication3 extends Application {
         usunBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-//                 m_primaryStage.setScene(utworzScene);
+                m_primaryStage.setScene(m_scenaUsuwania);
             }
         });
 
@@ -179,12 +217,13 @@ public class JavaFXApplication3 extends Application {
             });
         }
 
-        public Scene utworzScene() {
+        public VBox utworzScene() {
             VBox formularz = new VBox();
             formularz.setPadding(new Insets(15, 12, 15, 12));
             formularz.setSpacing(8);
             formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, wroc);
-            return new Scene(formularz, 300, 250);
+//            return new Scene(formularz, 300, 250);
+return formularz;
         }
         public Button wroc = new Button();
         public Button akcja = new Button();
@@ -324,12 +363,28 @@ public class JavaFXApplication3 extends Application {
             return wynik;
         }
 
-        public void edytuj(Pracownik p) {
+        public boolean usun(String pesel) {
+            Connection c = null;
+            Statement stmt = null;
 
-        }
+            boolean bRet = true;
+            try {
+                Class.forName(sterownik);
+                c = DriverManager.getConnection(nazwaBazy);
+                c.setAutoCommit(false);
 
-        public void usun(Pracownik p) {
+                stmt = c.createStatement();
+                String sql = "DELETE FROM pracownicy WHERE pesel = "+pesel;
+                stmt.executeUpdate(sql);
 
+                stmt.close();
+                c.commit();
+                c.close();
+            } catch (Exception e) {
+                System.err.println(e.getClass().getName() + ": " + e.getMessage());
+                bRet = false;
+            }
+            return bRet;
         }
 
         private void utworzPolaczenie() {
