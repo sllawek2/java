@@ -33,8 +33,6 @@ public class JavaFXApplication3 extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-//        m_primaryStage = primaryStage;
-        //       m_menu = utworzSceneMenu();
         formularzDodawania = new Formularz("Dodaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -51,9 +49,9 @@ public class JavaFXApplication3 extends Application {
                             formularzDodawania.nrKonta.getText(),
                             formularzDodawania.stanowisko.getText());
                     if (ret) {
-                        formularzDodawania.status.setText("Pomyslnie dodano do bazy");
+                        formularzDodawania.status.setText("Pomyślnie dodano do bazy");
                     } else {
-                        formularzDodawania.status.setText("Error");
+                        formularzDodawania.status.setText("Wystąpił błąd");
                     }
                 }
 
@@ -72,8 +70,9 @@ public class JavaFXApplication3 extends Application {
             }
         });
 
-        //zakładka dodawania
         TabPane tabPane = new TabPane();
+
+        //zakładka dodawania
         Tab tab = new Tab();
         tab.setText("Dodaj pracownika");
         tab.setContent(formularzDodawania.utworzVBox());
@@ -85,12 +84,12 @@ public class JavaFXApplication3 extends Application {
         tab1.setText("Szukaj pracownika");
         tab1.setContent(borderSzukania);
 
-        //zakładka usuwania
-        TextArea statusUsun = new TextArea();
+        //formularz usuwania
+        TextField statusUsun = new TextField();
         statusUsun.setEditable(false);
 
         TextField peselUsun = new TextField();
-        peselUsun.setPromptText("pesel do usuniecia");
+        peselUsun.setPromptText("pesel do usunięcia");
         Button usunBtn = new Button();
         usunBtn.setText("Usun");
         usunBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -98,24 +97,29 @@ public class JavaFXApplication3 extends Application {
             public void handle(ActionEvent event) {
                 boolean ret = baza.usun(peselUsun.getText());
                 if (ret) {
-                    statusUsun.setText("usunieto pomyslnie");
+                    statusUsun.setText("Ok");
                 } else {
-                    statusUsun.setText("blad podczas usuwania");
+                    statusUsun.setText("Błąd podczas usuwania z bazy");
                 }
             }
         });
+
         VBox vUsun = new VBox();
         vUsun.setPadding(new Insets(15, 12, 15, 12));
         vUsun.setSpacing(8);
 
         vUsun.getChildren().addAll(peselUsun, usunBtn, statusUsun);
 
+        //zakładka usuwania
         Tab tab2 = new Tab();
-        tab2.setText("Usun pracownika");
+        tab2.setText("Usuń pracownika");
         tab2.setContent(vUsun);
-        tabPane.getTabs().addAll(tab, tab1, tab2);
-        Scene root = new Scene(tabPane, 800, 600);
 
+        //dodanie zakładek do tab pane
+        tabPane.getTabs().addAll(tab, tab1, tab2);
+
+        //dodanie sceny
+        Scene root = new Scene(tabPane, 800, 600);
         primaryStage.setTitle("Pracownicy");
         primaryStage.setScene(root);
         primaryStage.show();
@@ -126,15 +130,13 @@ public class JavaFXApplication3 extends Application {
      */
     public static void main(String[] args) {
         launch(args);
-
     }
     private Formularz formularzDodawania;
     private Formularz formularzSzukania;
     private BazaDanych baza = new BazaDanych();
-    BorderPane borderSzukania = new BorderPane();
+    private BorderPane borderSzukania = new BorderPane();
 
     private class Formularz {
-
         public Formularz(String akcja, EventHandler<ActionEvent> e) {
             pesel.setPromptText("pesel");
             imie.setPromptText("imie");
@@ -178,7 +180,6 @@ public class JavaFXApplication3 extends Application {
             try {
                 Class.forName(sterownik);
                 c = DriverManager.getConnection(nazwaBazy);
-                c.setAutoCommit(false);
 
                 stmt = c.createStatement();
                 String sql = "INSERT INTO pracownicy (pesel,imie,nazwisko,nr_konta,stanowisko) "
@@ -186,10 +187,8 @@ public class JavaFXApplication3 extends Application {
                 stmt.executeUpdate(sql);
 
                 stmt.close();
-                c.commit();
                 c.close();
             } catch (Exception e) {
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
                 bRet = false;
             }
             return bRet;
@@ -209,7 +208,6 @@ public class JavaFXApplication3 extends Application {
             try {
                 Class.forName(sterownik);
                 c = DriverManager.getConnection(nazwaBazy);
-                c.setAutoCommit(false);
 
                 stmt = c.createStatement();
                 String sql = "select pesel,imie,nazwisko,nr_konta,stanowisko"
@@ -279,14 +277,13 @@ public class JavaFXApplication3 extends Application {
                 c.close();
 
             } catch (Exception e) {
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-
+        
             }
 
             if (nrWiersza == 1)//nie ma żadnego wyniku
             {
                 Label status = new Label("zapytanie nic nie zwróciło");
-                vLista.add(status, 0, 0, 5, 1);
+                vLista.add(status, 0, 0);
             } else {
                 Label l1 = new Label("pesel");
                 Label l2 = new Label("imie");
@@ -310,24 +307,17 @@ public class JavaFXApplication3 extends Application {
             try {
                 Class.forName(sterownik);
                 c = DriverManager.getConnection(nazwaBazy);
-                c.setAutoCommit(false);
-
+             
                 stmt = c.createStatement();
                 String sql = "DELETE FROM pracownicy WHERE pesel = " + pesel;
                 stmt.executeUpdate(sql);
 
                 stmt.close();
-                c.commit();
                 c.close();
             } catch (Exception e) {
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
                 bRet = false;
             }
             return bRet;
-        }
-
-        private void utworzPolaczenie() {
-
         }
     }
 }
