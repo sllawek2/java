@@ -33,6 +33,9 @@ public class JavaFXApplication3 extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        TabPane tabPane = new TabPane();
+
+        //zakładka dodawania
         formularzDodawania = new Formularz("Dodaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -41,7 +44,8 @@ public class JavaFXApplication3 extends Application {
                         || formularzDodawania.nazwisko.getText().isEmpty()
                         || formularzDodawania.nrKonta.getText().isEmpty()
                         || formularzDodawania.stanowisko.getText().isEmpty()) {
-                    formularzDodawania.status.setText("wypełnij wszystkie pola");
+                    Label status = new Label("wypełnij wszystkie pola");
+                    borderDodawania.setCenter(status);
                 } else {
                     boolean ret = baza.dodaj(formularzDodawania.pesel.getText(),
                             formularzDodawania.imie.getText(),
@@ -49,14 +53,24 @@ public class JavaFXApplication3 extends Application {
                             formularzDodawania.nrKonta.getText(),
                             formularzDodawania.stanowisko.getText());
                     if (ret) {
-                        formularzDodawania.status.setText("Pomyślnie dodano do bazy");
+                        Label status = new Label("Pomyślnie dodano do bazy");
+                        borderDodawania.setCenter(status);
                     } else {
-                        formularzDodawania.status.setText("Wystąpił błąd");
+                        Label status = new Label("Wystąpił błąd");
+                        borderDodawania.setCenter(status);
                     }
                 }
 
             }
         });
+
+        borderDodawania.setTop(formularzDodawania.utworzVBox());
+
+        Tab tab = new Tab();
+        tab.setText("Dodaj pracownika");
+        tab.setContent(borderDodawania);
+
+        //zakładka szukania
         formularzSzukania = new Formularz("Szukaj", new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -70,14 +84,6 @@ public class JavaFXApplication3 extends Application {
             }
         });
 
-        TabPane tabPane = new TabPane();
-
-        //zakładka dodawania
-        Tab tab = new Tab();
-        tab.setText("Dodaj pracownika");
-        tab.setContent(formularzDodawania.utworzVBox());
-
-        //zakładka szukania
         borderSzukania.setTop(formularzSzukania.utworzVBox());
 
         Tab tab1 = new Tab();
@@ -90,6 +96,7 @@ public class JavaFXApplication3 extends Application {
 
         TextField peselUsun = new TextField();
         peselUsun.setPromptText("pesel do usunięcia");
+        
         Button usunBtn = new Button();
         usunBtn.setText("Usun");
         usunBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -134,27 +141,27 @@ public class JavaFXApplication3 extends Application {
     private Formularz formularzDodawania;
     private Formularz formularzSzukania;
     private BazaDanych baza = new BazaDanych();
+    private BorderPane borderDodawania = new BorderPane();
     private BorderPane borderSzukania = new BorderPane();
 
     private class Formularz {
-        public Formularz(String akcja, EventHandler<ActionEvent> e) {
+
+        public Formularz(String napisNaPrzycisku, EventHandler<ActionEvent> e) {
             pesel.setPromptText("pesel");
             imie.setPromptText("imie");
             nazwisko.setPromptText("nazwisko");
             nrKonta.setPromptText("nrKonta");
             stanowisko.setPromptText("stanowisko");
 
-            this.akcja.setText(akcja);
-            this.akcja.setOnAction(e);
-
-            status.setEditable(false);
+            akcja.setText(napisNaPrzycisku);
+            akcja.setOnAction(e);
         }
 
         public VBox utworzVBox() {
             VBox formularz = new VBox();
             formularz.setPadding(new Insets(15, 12, 15, 12));
             formularz.setSpacing(8);
-            formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja, status);
+            formularz.getChildren().addAll(pesel, imie, nazwisko, nrKonta, stanowisko, akcja);
 
             return formularz;
         }
@@ -164,7 +171,6 @@ public class JavaFXApplication3 extends Application {
         public TextField nazwisko = new TextField();
         public TextField nrKonta = new TextField();
         public TextField stanowisko = new TextField();
-        public TextField status = new TextField();
     }
 
     private class BazaDanych {
@@ -277,7 +283,7 @@ public class JavaFXApplication3 extends Application {
                 c.close();
 
             } catch (Exception e) {
-        
+
             }
 
             if (nrWiersza == 1)//nie ma żadnego wyniku
@@ -307,7 +313,7 @@ public class JavaFXApplication3 extends Application {
             try {
                 Class.forName(sterownik);
                 c = DriverManager.getConnection(nazwaBazy);
-             
+
                 stmt = c.createStatement();
                 String sql = "DELETE FROM pracownicy WHERE pesel = " + pesel;
                 stmt.executeUpdate(sql);
